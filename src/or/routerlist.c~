@@ -1909,49 +1909,7 @@ kb_to_bytes(uint32_t bw)
 {
   return (bw > (INT32_MAX/1000)) ? INT32_MAX : bw*1000;
 }
-/** #AVK filter all the slow bandwidths,list should contain only fast 
-bandwidths */
-void filter_slow_bandwidths(u64_dbl_t *bandwidths){
-  SMARTLIST_FOREACH_BEGIN(bandwidths, const node_t *, node) {
-    int this_bw = 0;
-    if (node->rs) {
-      if (!node->rs->has_bandwidth) {
-        tor_free(bandwidths);
-        /* This should never happen, unless all the authorites downgrade
-         * to 0.2.0 or rogue routerstatuses get inserted into our consensus. */
-        log_warn(LD_BUG,
-                 "Consensus is not listing bandwidths. Defaulting back to "
-                 "old router selection algorithm.");
-        return -1;
-      }
-      this_bw = kb_to_bytes(node->rs->bandwidth_kb);
-    } else if (node->ri) {
-      /* bridge or other descriptor not in our consensus */
-      this_bw = bridge_get_advertised_bandwidth_bounded(node->ri);
-    } else {
-      /* We can't use this one. */
-      continue;
-    }
 
-    if (is_guard && is_exit) {
-      weight = (is_dir ? Wdb*Wd : Wd);
-    } else if (is_guard) {
-      weight = (is_dir ? Wgb*Wg : Wg);
-    } else if (is_exit) {
-      weight = (is_dir ? Web*We : We);
-    } else { // middle
-      weight = (is_dir ? Wmb*Wm : Wm);
-    }
-    /* These should be impossible; but overflows here would be bad, so let's
-     * make sure. */
-    if (this_bw < 0)
-      this_bw = 0;
-    if (weight < 0.0)
-      weight = 0.0;
-
-    bandwidths[node_sl_idx].dbl = weight*this_bw + 0.5;
-  } SMARTLIST_FOREACH_END(node);
-}
 /** Helper function:
  * choose a random element of smartlist <b>sl</b> of nodes, weighted by
  * the advertised bandwidth of each element using the consensus
@@ -1965,11 +1923,10 @@ void filter_slow_bandwidths(u64_dbl_t *bandwidths){
  * Exit-to-total bandwidth.  If <b>rule</b>==WEIGHT_FOR_GUARD, we're picking a
  * guard node: consider all guard's bandwidth equally. Otherwise, weight
  * guards proportionally less.
-#AVK modified
  */
 static const node_t *
 smartlist_choose_node_by_bandwidth_weights(const smartlist_t *sl,
-                                           bandwidth_weight_rule_t rule,int is_fast_needed)
+                                           bandwidth_weight_rule_t rule)
 {
   u64_dbl_t *bandwidths=NULL;
 
@@ -1977,9 +1934,7 @@ smartlist_choose_node_by_bandwidth_weights(const smartlist_t *sl,
     return NULL;
 
   scale_array_elements_to_u64(bandwidths, smartlist_len(sl), NULL);
-  if(is_fast_needed){
-	filter_slow_bandwidths(bandwidths);
-  }
+
   {
     int idx = choose_array_element_by_weight(bandwidths,
                                              smartlist_len(sl));
@@ -2191,11 +2146,10 @@ frac_nodes_with_descriptors(const smartlist_t *sl,
  * Exit-to-total bandwidth.  If <b>rule</b>==WEIGHT_FOR_GUARD, we're picking a
  * guard node: consider all guard's bandwidth equally. Otherwise, weight
  * guards proportionally less.
-#AVK Modified
  */
 static const node_t *
 smartlist_choose_node_by_bandwidth(const smartlist_t *sl,
-                                   bandwidth_weight_rule_t rule,int is_fast_needed)
+                                   bandwidth_weight_rule_t rule)
 {
   unsigned int i;
   u64_dbl_t *bandwidths;
@@ -2392,7 +2346,7 @@ smartlist_choose_node_by_bandwidth(const smartlist_t *sl,
  * the advertised bandwidth of each node */
 const node_t *
 node_sl_choose_by_bandwidth(const smartlist_t *sl,
-                            bandwidth_weight_rule_t rule,int is_fast_neededed)
+                            bandwidth_weight_rule_t rule)
 { /*XXXX MOVE */
   const node_t *ret;
   if ((ret = smartlist_choose_node_by_bandwidth_weights(sl, rule))) {

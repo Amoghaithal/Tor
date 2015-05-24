@@ -2029,14 +2029,12 @@ connection_ap_make_link(connection_t *partner,
   log_info(LD_APP,"Making internal %s tunnel to %s:%d ...",
            want_onehop ? "direct" : "anonymized",
            safe_str_client(address), port);
+
   conn = entry_connection_new(CONN_TYPE_AP, tor_addr_family(&partner->addr));
   base_conn = ENTRY_TO_CONN(conn);
   base_conn->linked = 1; /* so that we can add it safely below. */
 
-/** #AKV fast connection if Size is greater than limit 
-  if(size>limit)base_conn->is_fast_connection_needed=1; 
-*/ 
- /* populate conn->socks_request */
+  /* populate conn->socks_request */
 
   /* leave version at zero, so the socks_reply is empty */
   conn->socks_request->socks_version = 0;
