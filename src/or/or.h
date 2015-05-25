@@ -538,7 +538,7 @@ typedef enum {
 /** This circuit is used for path bias probing only */
 #define CIRCUIT_PURPOSE_PATH_BIAS_TESTING 20
 #define CIRCUIT_PURPOSE_MAX_ 20
-/** This circuit is used for distinguishing fast Circuits 
+/**  #AVK This circuit is used for distinguishing fast Circuits 
 */
 #define CIRCUIT_PURPOSE_FAST 21
 

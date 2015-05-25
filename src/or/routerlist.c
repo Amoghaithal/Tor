@@ -1910,47 +1910,23 @@ kb_to_bytes(uint32_t bw)
   return (bw > (INT32_MAX/1000)) ? INT32_MAX : bw*1000;
 }
 /** #AVK filter all the slow bandwidths,list should contain only fast 
-bandwidths */
-void filter_slow_bandwidths(u64_dbl_t *bandwidths){
-  SMARTLIST_FOREACH_BEGIN(bandwidths, const node_t *, node) {
-    int this_bw = 0;
-    if (node->rs) {
-      if (!node->rs->has_bandwidth) {
-        tor_free(bandwidths);
-        /* This should never happen, unless all the authorites downgrade
-         * to 0.2.0 or rogue routerstatuses get inserted into our consensus. */
-        log_warn(LD_BUG,
-                 "Consensus is not listing bandwidths. Defaulting back to "
-                 "old router selection algorithm.");
-        return -1;
-      }
-      this_bw = kb_to_bytes(node->rs->bandwidth_kb);
-    } else if (node->ri) {
-      /* bridge or other descriptor not in our consensus */
-      this_bw = bridge_get_advertised_bandwidth_bounded(node->ri);
-    } else {
-      /* We can't use this one. */
-      continue;
-    }
-
-    if (is_guard && is_exit) {
-      weight = (is_dir ? Wdb*Wd : Wd);
-    } else if (is_guard) {
-      weight = (is_dir ? Wgb*Wg : Wg);
-    } else if (is_exit) {
-      weight = (is_dir ? Web*We : We);
-    } else { // middle
-      weight = (is_dir ? Wmb*Wm : Wm);
-    }
-    /* These should be impossible; but overflows here would be bad, so let's
-     * make sure. */
-    if (this_bw < 0)
-      this_bw = 0;
-    if (weight < 0.0)
-      weight = 0.0;
-
-    bandwidths[node_sl_idx].dbl = weight*this_bw + 0.5;
-  } SMARTLIST_FOREACH_END(node);
+bandwidths returns new bandwidths length*/
+int  filter_slow_bandwidths(u64_dbl_t *bandwidths,int n,u64_dbl_t *new_bandwidths){
+	int ind=0,i;
+	new_bandwidths=tor_malloc(sizeof(u64_dbl_t) * n);
+	for(i=0;i<n;i++){
+	   if(bandwidths[i].u64>=limit){
+	   	new_bandwidths[ind++].u64=bandwidths[i].u64;
+	   }	
+	}
+	return ind;
+}
+/* #AVK get new id for new_bandwidths */
+int get_id_from_new_bandwidths(int value,u64_dbl_t *bandwidths,int n){
+	int i;
+	for(i=0;i<n;i++)
+		if(bandwidths[i].u64==value)return i;
+	return -1;
 }
 /** Helper function:
  * choose a random element of smartlist <b>sl</b> of nodes, weighted by
@@ -1972,18 +1948,23 @@ smartlist_choose_node_by_bandwidth_weights(const smartlist_t *sl,
                                            bandwidth_weight_rule_t rule,int is_fast_needed)
 {
   u64_dbl_t *bandwidths=NULL;
-
+  u64_dbl_t *new_bandwidths=NULL;
   if (compute_weighted_bandwidths(sl, rule, &bandwidths) < 0)
     return NULL;
 
   scale_array_elements_to_u64(bandwidths, smartlist_len(sl), NULL);
-  if(is_fast_needed){
-	filter_slow_bandwidths(bandwidths);
+  int new_length=smartlist_len(sl);
+/* #AVK modified */  
+   if(is_fast_needed){
+	new_length=filter_slow_bandwidths(bandwidths,smartlist_len(sl),new_bandwidths);
   }
+  else new_bandwidths=bandwidths;
   {
-    int idx = choose_array_element_by_weight(bandwidths,
-                                             smartlist_len(sl));
+    int idx = choose_array_element_by_weight(new_bandwidths,
+                                             new_length);
+    if(is_fast_needed)idx=get_id_from_new_bandwidths(new_bandwidths[idx],bandwidths,smartlist_len(sl));
     tor_free(bandwidths);
+    tor_free(new_bandwidths);
     return idx < 0 ? NULL : smartlist_get(sl, idx);
   }
 }
@@ -2374,8 +2355,25 @@ smartlist_choose_node_by_bandwidth(const smartlist_t *sl,
             U64_PRINTF_ARG(total_guard_bw), U64_PRINTF_ARG(total_nonguard_bw),
             guard_weight, (int)(rule == WEIGHT_FOR_GUARD));
 #endif
-
+/*#AVK modified */
   scale_array_elements_to_u64(bandwidths, smartlist_len(sl), NULL);
+  int new_length=smartlist_len(sl);
+  u64_dbl_t *new_bandwidths=NULL;
+   if(is_fast_needed){
+	new_length=filter_slow_bandwidths(bandwidths,smartlist_len(sl),new_bandwidths);
+  }
+  else new_bandwidths=bandwidths;
+  {
+    int idx = choose_array_element_by_weight(new_bandwidths,
+                                             new_length);
+    tor_free(fast_bits);
+    tor_free(exit_bits);
+    tor_free(guard_bits);
+    if(is_fast_needed)idx=get_id_from_new_bandwidths(new_bandwidths[idx],bandwidths,smartlist_len(sl));
+    tor_free(new_bandwidths);
+    tor_free(bandwidths);
+    return idx < 0 ? NULL : smartlist_get(sl, idx);
+  }
 
   {
     int idx = choose_array_element_by_weight(bandwidths,
@@ -2390,15 +2388,16 @@ smartlist_choose_node_by_bandwidth(const smartlist_t *sl,
 
 /** Choose a random element of status list <b>sl</b>, weighted by
  * the advertised bandwidth of each node */
+/* #AVK modified */
 const node_t *
 node_sl_choose_by_bandwidth(const smartlist_t *sl,
-                            bandwidth_weight_rule_t rule,int is_fast_neededed)
+                            bandwidth_weight_rule_t rule,int is_fast_needed)
 { /*XXXX MOVE */
   const node_t *ret;
-  if ((ret = smartlist_choose_node_by_bandwidth_weights(sl, rule))) {
+  if ((ret = smartlist_choose_node_by_bandwidth_weights(sl, rule,is_fast_needed))) {
     return ret;
   } else {
-    return smartlist_choose_node_by_bandwidth(sl, rule);
+    return smartlist_choose_node_by_bandwidth(sl, rule,is_fast_needed);
   }
 }
 
