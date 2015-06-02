@@ -538,13 +538,8 @@ typedef enum {
 /** This circuit is used for path bias probing only */
 #define CIRCUIT_PURPOSE_PATH_BIAS_TESTING 20
 #define CIRCUIT_PURPOSE_MAX_ 20
-/**  #AVK This circuit is used for distinguishing fast Circuits 
-*/
-#define CIRCUIT_PURPOSE_FAST 21
-
 /** A catch-all for unrecognized purposes. Currently we don't expect
  * to make or see any circuits with this purpose. */
-
 #define CIRCUIT_PURPOSE_UNKNOWN 255
 
 /** True iff the circuit purpose <b>p</b> is for a circuit that
@@ -1268,9 +1263,6 @@ typedef struct connection_t {
   /** Bytes written since last call to control_event_conn_bandwidth_used().
    * Only used if we're configured to emit CONN_BW events. */
   uint32_t n_written_conn_bw;
-
-  /** #AVK fast connection */
-  unsigned int is_fast_connection_needed:1;
 } connection_t;
 
 /** Subtype of connection_t; used for a listener socket. */

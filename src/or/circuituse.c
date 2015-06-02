@@ -1028,11 +1028,14 @@ circuit_predict_and_launch_new(void)
   /* Second, see if we need any more exit circuits. */
   /* check if we know of a port that's been requested recently
    * and no circuit is currently available that can handle it. */
+  /*VKA modified  frequency for fast circuit creation*/
+  int frequent_fast_circuit_create=3;
   if (!circuit_all_predicted_ports_handled(now, &port_needs_uptime,
                                            &port_needs_capacity)) {
     if (port_needs_uptime)
       flags |= CIRCLAUNCH_NEED_UPTIME;
-    if (port_needs_capacity)
+   /*VKA modified **/    
+	if (port_needs_capacity || num%(frequent_fast_circuit_create)==0)
       flags |= CIRCLAUNCH_NEED_CAPACITY;
     log_info(LD_CIRC,
              "Have %d clean circs (%d internal), need another exit circ.",
@@ -1765,6 +1768,80 @@ circuit_reset_failure_count(int timeout)
   n_circuit_failures = 0;
 }
 
+/** VKA modified **/
+/* convert string of type "10 MiB" to bytes */
+
+static guint64 handleBytes(const gchar* byteStr) {
+    g_assert(byteStr);
+
+    GError* error = NULL;
+
+    /* split into parts (format example: "10 MiB") */
+    gchar** tokens = g_strsplit(byteStr, (const gchar*) " ", 2);
+    gchar* bytesToken = tokens[0];
+    gchar* suffixToken = tokens[1];
+
+    glong bytesTokenLength = g_utf8_strlen(bytesToken, -1);
+    for (glong i = 0; i < bytesTokenLength; i++) {
+        gchar c = bytesToken[i];
+        if (!g_ascii_isdigit(c)) {
+            error = g_error_new(G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT,
+                    "non-digit byte '%c' in byte string '%s'"
+                    "expected format like '10240' or '10 KiB'",
+                    c, byteStr);
+            break;
+        }
+    }
+	guint64 bytes=-1;
+    if (!error) {
+        bytes = g_ascii_strtoull(bytesToken, NULL, 10);
+
+        if (suffixToken) {
+            gint base = 0, exponent = 0;
+
+            if (!g_ascii_strcasecmp(suffixToken, "kb")) {
+                base = 10, exponent = 3;
+            } else if (!g_ascii_strcasecmp(suffixToken, "mb")) {
+                base = 10, exponent = 6;
+            } else if (!g_ascii_strcasecmp(suffixToken, "gb")) {
+                base = 10, exponent = 9;
+            } else if (!g_ascii_strcasecmp(suffixToken, "tb")) {
+                base = 10, exponent = 12;
+            } else if (!g_ascii_strcasecmp(suffixToken, "kib")) {
+                base = 2, exponent = 10;
+            } else if (!g_ascii_strcasecmp(suffixToken, "mib")) {
+                base = 2, exponent = 20;
+            } else if (!g_ascii_strcasecmp(suffixToken, "gib")) {
+                base = 2, exponent = 30;
+            } else if (!g_ascii_strcasecmp(suffixToken, "tib")) {
+                base = 2, exponent = 40;
+            } else {
+                error = g_error_new(G_MARKUP_ERROR,
+                        G_MARKUP_ERROR_INVALID_CONTENT,
+                        "invalid bytes suffix '%s' in byte string '%s' , "
+                        "expected one of: 'kib','mib','gib','tib','kb','mb','gb', or 'tb'",
+                        suffixToken, byteStr);
+            }
+
+            if (!error && base && exponent) {
+                bytes = (guint64) (bytes
+                        * pow((gdouble) base, (gdouble) exponent));
+            }
+        }
+
+        tgen_debug("parsed %lu bytes from string %s", bytes, byteStr);
+
+        
+    }
+
+    g_strfreev(tokens);
+
+    return bytes;
+}
+
+
+
+
 /** Find an open circ that we're happy to use for <b>conn</b> and return 1. If
  * there isn't one, and there isn't one on the way, launch one and return
  * 0. If it will never work, return -1.
@@ -1801,7 +1878,10 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
     need_internal = 1;
   else
     need_internal = 0;
-
+  /** VKV modified **/
+  const int limit=25550;
+  guint64 clientSize=handleBytes(get_options()->Size);
+  if(clientSize<limit){
   circ = circuit_get_best(conn, 1, desired_circuit_purpose,
                           need_uptime, need_internal);
 
@@ -1972,6 +2052,7 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
         }
       }
     }
+}
 
     if (desired_circuit_purpose == CIRCUIT_PURPOSE_C_REND_JOINED)
       new_circ_purpose = CIRCUIT_PURPOSE_C_ESTABLISH_REND;
