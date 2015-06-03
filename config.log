@@ -389,7 +389,7 @@ configure:6095: $? = 0
 configure:6112: result: none required
 configure:6120: checking for library containing dlopen
 configure:6151: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c  >&5
-/tmp/cc3fg6Qt.o: In function `main':
+/tmp/ccfxdVb9.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:34: undefined reference to `dlopen'
 collect2: error: ld returned 1 exit status
 configure:6151: $? = 1
@@ -444,7 +444,7 @@ configure:6264: $? = 0
 configure:6281: result: none required
 configure:6295: checking for library containing pthread_create
 configure:6326: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -ldl  >&5
-/tmp/ccMYr7GH.o: In function `main':
+/tmp/ccx2S2P9.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:34: undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
 configure:6326: $? = 1
@@ -495,7 +495,7 @@ configure:6382: $? = 0
 configure:6399: result: none required
 configure:6447: checking for _NSGetEnviron
 configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -lpthread -ldl  >&5
-/tmp/ccMuVaMT.o: In function `main':
+/tmp/ccObGfuk.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:57: undefined reference to `_NSGetEnviron'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -615,7 +615,7 @@ configure:6447: $? = 0
 configure:6447: result: yes
 configure:6447: checking for issetugid
 configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -lpthread -ldl  >&5
-/tmp/ccfC0AWA.o: In function `main':
+/tmp/ccS2Q4If.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:70: undefined reference to `issetugid'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -699,7 +699,7 @@ configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/includ
 conftest.c:59:6: warning: conflicting types for built-in function 'llround' [enabled by default]
  char llround ();
       ^
-/tmp/cc5OCZnF.o: In function `main':
+/tmp/ccT9kPth.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:70: undefined reference to `llround'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -787,7 +787,7 @@ configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/includ
 conftest.c:60:6: warning: conflicting types for built-in function 'lround' [enabled by default]
  char lround ();
       ^
-/tmp/ccl3UKXN.o: In function `main':
+/tmp/ccNdx3Eh.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:71: undefined reference to `lround'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -880,7 +880,7 @@ configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/includ
 conftest.c:62:6: warning: conflicting types for built-in function 'rint' [enabled by default]
  char rint ();
       ^
-/tmp/ccIAxma1.o: In function `main':
+/tmp/ccH3wjvv.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:73: undefined reference to `rint'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -972,7 +972,7 @@ configure:6447: $? = 0
 configure:6447: result: yes
 configure:6447: checking for strlcat
 configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -lpthread -ldl  >&5
-/tmp/ccHd7Amd.o: In function `main':
+/tmp/ccJ37JRH.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:75: undefined reference to `strlcat'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -1058,7 +1058,7 @@ configure: failed program was:
 configure:6447: result: no
 configure:6447: checking for strlcpy
 configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -lpthread -ldl  >&5
-/tmp/ccUjfMT7.o: In function `main':
+/tmp/ccYYhbyJ.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:75: undefined reference to `strlcpy'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -1176,7 +1176,7 @@ configure:6447: $? = 0
 configure:6447: result: yes
 configure:6447: checking for _vscprintf
 configure:6447: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -lpthread -ldl  >&5
-/tmp/cc5XImaF.o: In function `main':
+/tmp/ccNWOgdk.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:83: undefined reference to `_vscprintf'
 collect2: error: ld returned 1 exit status
 configure:6447: $? = 1
@@ -1726,7 +1726,7 @@ configure:6913: $? = 0
 configure:6913: result: yes
 configure:6913: checking for evutil_secure_rng_set_urandom_device_file
 configure:6913: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g -I/home/virtual/.shadow/include  -I${top_srcdir}/src/common -L/home/virtual/.shadow/lib  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib conftest.c -levent   -lpthread -ldl  >&5
-/tmp/cc3pR9kx.o: In function `main':
+/tmp/cc2h1o69.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:90: undefined reference to `evutil_secure_rng_set_urandom_device_file'
 collect2: error: ld returned 1 exit status
 configure:6913: $? = 1
@@ -2022,7 +2022,7 @@ configure:7092: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/includ
 conftest.c:68:6: warning: conflicting types for built-in function 'pow' [enabled by default]
  char pow ();
       ^
-/tmp/ccX3tJG6.o: In function `main':
+/tmp/ccFzCvqw.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:72: undefined reference to `pow'
 collect2: error: ld returned 1 exit status
 configure:7092: $? = 1
@@ -2428,7 +2428,7 @@ configure:9662: checking for seccomp.h
 configure:9662: result: no
 configure:9672: checking for library containing seccomp_init
 configure:9703: gcc -o conftest -fPIC -fno-inline -I/home/virtual/.shadow/include -I/home/virtual/.local/include -I/home/virtual/.local/share/llvm/cmake -g -fasynchronous-unwind-tables  -I${top_srcdir}/src/common  -L/home/virtual/.shadow/lib -L/home/virtual/.local/lib -rdynamic conftest.c -lpthread -ldl  >&5
-/tmp/ccWNS3dO.o: In function `main':
+/tmp/ccVMMY0j.o: In function `main':
 /home/virtual/shadow/shadow-plugin-tor/build/tor/conftest.c:73: undefined reference to `seccomp_init'
 collect2: error: ld returned 1 exit status
 configure:9703: $? = 1

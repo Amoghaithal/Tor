@@ -467,8 +467,9 @@ static config_var_t option_vars_[] = {
   V(TestingMicrodescMaxDownloadTries, UINT, "8"),
   V(TestingCertMaxDownloadTries, UINT, "8"),
   V(TestingDirAuthVoteGuard, ROUTERSET, NULL),
+  V(Size,UINT,"-1"),
   VAR("___UsingTestNetworkDefaults", BOOL, UsingTestNetworkDefaults_, "0"),
-  V(Size,STRING,"default"),
+  
   { NULL, CONFIG_TYPE_OBSOLETE, 0, NULL }
 };
 

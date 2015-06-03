@@ -458,8 +458,8 @@ tor_tls_init(void)
 {
   if (!tls_library_is_initialized) {
     long version;
-    SSL_library_init();
-    SSL_load_error_strings();
+    tor_ssl_global_init();
+    
 
     version = SSLeay();
 
@@ -1869,9 +1869,11 @@ tor_tls_new(int sock, int isServer)
 #ifdef SSL_set_tlsext_host_name
   /* Browsers use the TLS hostname extension, so we should too. */
   if (!isServer) {
+if(!isServer) {
     char *fake_hostname = crypto_random_hostname(4,25, "www.",".com");
     SSL_set_tlsext_host_name(result->ssl, fake_hostname);
     tor_free(fake_hostname);
+}
   }
 #endif
 

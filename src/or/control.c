@@ -2648,7 +2648,7 @@ handle_control_attachstream(control_connection_t *conn, uint32_t len,
     }
     /* Do both the client and relay allow one-hop exit circuits? */
     if (!node ||
-        //!node_allows_single_hop_exits(node) ||
+        ////!node_allows_single_hop_exits(node) ||
         !get_options()->AllowSingleHopCircuits) {
       connection_write_str_to_buf(
       "551 Can't attach stream to this one-hop circuit.\r\n", conn);

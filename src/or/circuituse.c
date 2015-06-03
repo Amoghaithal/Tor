@@ -1771,73 +1771,6 @@ circuit_reset_failure_count(int timeout)
 /** VKA modified **/
 /* convert string of type "10 MiB" to bytes */
 
-static guint64 handleBytes(const gchar* byteStr) {
-    g_assert(byteStr);
-
-    GError* error = NULL;
-
-    /* split into parts (format example: "10 MiB") */
-    gchar** tokens = g_strsplit(byteStr, (const gchar*) " ", 2);
-    gchar* bytesToken = tokens[0];
-    gchar* suffixToken = tokens[1];
-
-    glong bytesTokenLength = g_utf8_strlen(bytesToken, -1);
-    for (glong i = 0; i < bytesTokenLength; i++) {
-        gchar c = bytesToken[i];
-        if (!g_ascii_isdigit(c)) {
-            error = g_error_new(G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT,
-                    "non-digit byte '%c' in byte string '%s'"
-                    "expected format like '10240' or '10 KiB'",
-                    c, byteStr);
-            break;
-        }
-    }
-	guint64 bytes=-1;
-    if (!error) {
-        bytes = g_ascii_strtoull(bytesToken, NULL, 10);
-
-        if (suffixToken) {
-            gint base = 0, exponent = 0;
-
-            if (!g_ascii_strcasecmp(suffixToken, "kb")) {
-                base = 10, exponent = 3;
-            } else if (!g_ascii_strcasecmp(suffixToken, "mb")) {
-                base = 10, exponent = 6;
-            } else if (!g_ascii_strcasecmp(suffixToken, "gb")) {
-                base = 10, exponent = 9;
-            } else if (!g_ascii_strcasecmp(suffixToken, "tb")) {
-                base = 10, exponent = 12;
-            } else if (!g_ascii_strcasecmp(suffixToken, "kib")) {
-                base = 2, exponent = 10;
-            } else if (!g_ascii_strcasecmp(suffixToken, "mib")) {
-                base = 2, exponent = 20;
-            } else if (!g_ascii_strcasecmp(suffixToken, "gib")) {
-                base = 2, exponent = 30;
-            } else if (!g_ascii_strcasecmp(suffixToken, "tib")) {
-                base = 2, exponent = 40;
-            } else {
-                error = g_error_new(G_MARKUP_ERROR,
-                        G_MARKUP_ERROR_INVALID_CONTENT,
-                        "invalid bytes suffix '%s' in byte string '%s' , "
-                        "expected one of: 'kib','mib','gib','tib','kb','mb','gb', or 'tb'",
-                        suffixToken, byteStr);
-            }
-
-            if (!error && base && exponent) {
-                bytes = (guint64) (bytes
-                        * pow((gdouble) base, (gdouble) exponent));
-            }
-        }
-
-        tgen_debug("parsed %lu bytes from string %s", bytes, byteStr);
-
-        
-    }
-
-    g_strfreev(tokens);
-
-    return bytes;
-}
 
 
 
@@ -1858,7 +1791,7 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
   int need_uptime, need_internal;
   int want_onehop;
   const or_options_t *options = get_options();
-
+  extend_info_t *extend_info=NULL;
   tor_assert(conn);
   tor_assert(circp);
   tor_assert(ENTRY_TO_CONN(conn)->state == AP_CONN_STATE_CIRCUIT_WAIT);
@@ -1880,11 +1813,11 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
     need_internal = 0;
   /** VKV modified **/
   const int limit=25550;
-  guint64 clientSize=handleBytes(get_options()->Size);
-  if(clientSize<limit){
+  //long long int  clientSize=handleBytes(get_options()->Size);
+  if(options->Size<limit){
   circ = circuit_get_best(conn, 1, desired_circuit_purpose,
                           need_uptime, need_internal);
-
+}
   if (circ) {
     *circp = circ;
     return 1; /* we're happy */
@@ -1958,12 +1891,14 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
   }
 
   /* is one already on the way? */
+  if(options->Size<limit){
   circ = circuit_get_best(conn, 0, desired_circuit_purpose,
                           need_uptime, need_internal);
+  }
   if (circ)
     log_debug(LD_CIRC, "one on the way!");
   if (!circ) {
-    extend_info_t *extend_info=NULL;
+    
     uint8_t new_circ_purpose;
     const int n_pending = count_pending_general_client_circuits();
 
@@ -2054,6 +1989,7 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
     }
 }
 
+	int new_circ_purpose;
     if (desired_circuit_purpose == CIRCUIT_PURPOSE_C_REND_JOINED)
       new_circ_purpose = CIRCUIT_PURPOSE_C_ESTABLISH_REND;
     else if (desired_circuit_purpose == CIRCUIT_PURPOSE_C_INTRODUCE_ACK_WAIT)
@@ -2100,7 +2036,7 @@ circuit_get_open_circ_or_launch(entry_connection_t *conn,
           rend_client_rendcirc_has_opened(circ);
       }
     }
-  } /* endif (!circ) */
+   /* endif (!circ) */
   if (circ) {
     /* Mark the circuit with the isolation fields for this connection.
      * When the circuit arrives, we'll clear these flags: this is
